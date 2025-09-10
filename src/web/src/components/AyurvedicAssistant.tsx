@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle,CardFooter } from './ui/card';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Textarea } from './ui/textarea';
@@ -91,6 +91,7 @@ const treatmentModalities = [
 
 const doshaCharacteristics = {
   vata: {
+    label: "Vata (वात)",
     icon: Wind,
     color: 'from-blue-400 to-cyan-500',
     qualities: ['Light', 'Dry', 'Cold', 'Mobile', 'Rough'],
@@ -98,6 +99,7 @@ const doshaCharacteristics = {
     imbalance: ['Anxiety', 'Insomnia', 'Constipation', 'Joint Pain']
   },
   pitta: {
+    label: "Pitta (पित्त)",
     icon: Flame,
     color: 'from-red-400 to-orange-500',
     qualities: ['Hot', 'Sharp', 'Light', 'Liquid', 'Oily'],
@@ -105,6 +107,7 @@ const doshaCharacteristics = {
     imbalance: ['Acidity', 'Skin Issues', 'Anger', 'Inflammation']
   },
   kapha: {
+    label: "Kapha (कफ)",
     icon: Droplets,
     color: 'from-green-400 to-emerald-500',
     qualities: ['Heavy', 'Slow', 'Cool', 'Stable', 'Smooth'],
@@ -131,9 +134,9 @@ export default function AyurvedicAssistant() {
   };
 
   const getDoshaIcon = (dosha: string) => {
-    if (dosha.includes('Vata')) return <Wind className="w-4 h-4 text-blue-600" />;
-    if (dosha.includes('Pitta')) return <Flame className="w-4 h-4 text-red-600" />;
-    if (dosha.includes('Kapha')) return <Droplets className="w-4 h-4 text-green-600" />;
+    if (dosha.includes('Vata ( वात )')) return <Wind className="w-4 h-4 text-blue-600" />;
+    if (dosha.includes('Pitta ( पित्त )')) return <Flame className="w-4 h-4 text-red-600" />;
+    if (dosha.includes('Kapha ( कफ )')) return <Droplets className="w-4 h-4 text-green-600" />;
     return <Leaf className="w-4 h-4" />;
   };
 
@@ -189,7 +192,7 @@ export default function AyurvedicAssistant() {
               <CardHeader className={`bg-gradient-to-br ${details.color} text-white`}>
                 <CardTitle className="flex items-center gap-3 text-white">
                   <details.icon className="w-6 h-6" />
-                  <span className="capitalize font-bold">{dosha}</span>
+                  <span className="capitalize font-bold">{details.label}</span>
                 </CardTitle>
                 <CardDescription className="text-white/90">
                   {dosha === 'vata' && 'Movement & Nervous System'}
@@ -248,80 +251,91 @@ export default function AyurvedicAssistant() {
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <Card className="border-2 border-indigo-200 h-96">
-            <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50">
-              <CardTitle className="flex items-center gap-2">
-                <MessageSquare className="w-5 h-5 text-indigo-600" />
-                AI Consultation Chat
-              </CardTitle>
-              <CardDescription>
-                Intelligent Ayurvedic health assistant with FHIR code mapping
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-4 h-80 flex flex-col">
-              <div className="flex-1 overflow-y-auto space-y-4 mb-4">
-                {chatHistory.map((chat, index) => (
-                  <div key={index} className={`flex ${chat.type === 'user' ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-xs lg:max-w-md xl:max-w-lg ${
-                      chat.type === 'user' 
-                        ? 'bg-indigo-600 text-white rounded-l-2xl rounded-tr-2xl' 
-                        : 'bg-gray-100 text-gray-800 rounded-r-2xl rounded-tl-2xl'
-                    } p-3`}>
-                      {chat.type === 'assistant' && (
-                        <div className="flex items-center gap-2 mb-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarFallback className="bg-gradient-to-br from-orange-500 to-red-500 text-white text-xs">
-                              AI
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="text-xs font-medium text-gray-600">AyurVedic AI</span>
-                          {chat.confidence && (
-                            <Badge variant="outline" className="text-xs">
-                              {chat.confidence}% confident
-                            </Badge>
-                          )}
-                        </div>
-                      )}
-                      <p className="text-sm whitespace-pre-line">{chat.message}</p>
-                      <span className="text-xs opacity-75 mt-2 block">{chat.timestamp}</span>
-                    </div>
-                  </div>
-                ))}
-                
-                {isTyping && (
-                  <div className="flex justify-start">
-                    <div className="bg-gray-100 rounded-r-2xl rounded-tl-2xl p-3">
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6">
-                          <AvatarFallback className="bg-gradient-to-br from-orange-500 to-red-500 text-white text-xs">
-                            AI
-                          </AvatarFallback>
-                        </Avatar>
-                        <div className="flex space-x-1">
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-                          <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-              
-              <div className="flex gap-2">
-                <Input
-                  value={message}
-                  onChange={(e) => setMessage(e.target.value)}
-                  placeholder="Ask about symptoms, treatments, or doshas..."
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  className="flex-1"
-                />
-                <Button onClick={handleSendMessage} disabled={!message.trim() || isTyping}>
-                  <Send className="w-4 h-4" />
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+          <Card className="border-2 border-indigo-200 h-96 flex flex-col">
+  {/* Header */}
+  <CardHeader className="bg-gradient-to-r from-indigo-50 to-purple-50">
+    <CardTitle className="flex items-center gap-2">
+      <MessageSquare className="w-5 h-5 text-indigo-600" />
+      AI Consultation Chat
+    </CardTitle>
+    <CardDescription>
+      Intelligent Ayurvedic health assistant with FHIR code mapping
+    </CardDescription>
+  </CardHeader>
+
+  {/* Messages */}
+  <CardContent className="flex-1 overflow-y-auto p-4 space-y-4">
+    {chatHistory.map((chat, index) => (
+      <div key={index} className={`flex ${chat.type === 'user' ? 'justify-end' : 'justify-start'}`}>
+        <div
+          className={`max-w-xs lg:max-w-md xl:max-w-lg ${
+            chat.type === 'user'
+              ? 'bg-indigo-600 text-white rounded-l-2xl rounded-tr-2xl'
+              : 'bg-gray-100 text-gray-800 rounded-r-2xl rounded-tl-2xl'
+          } p-3`}
+        >
+          {chat.type === 'assistant' && (
+            <div className="flex items-center gap-2 mb-2">
+              <Avatar className="h-6 w-6">
+                <AvatarFallback className="bg-gradient-to-br from-orange-500 to-red-500 text-white text-xs">
+                  AI
+                </AvatarFallback>
+              </Avatar>
+              <span className="text-xs font-medium text-gray-600">AyurVedic AI</span>
+              {chat.confidence && (
+                <Badge variant="outline" className="text-xs">
+                  {chat.confidence}% confident
+                </Badge>
+              )}
+            </div>
+          )}
+          <p className="text-sm whitespace-pre-line">{chat.message}</p>
+          <span className="text-xs opacity-75 mt-2 block">{chat.timestamp}</span>
+        </div>
+      </div>
+    ))}
+
+    {isTyping && (
+      <div className="flex justify-start">
+        <div className="bg-gray-100 rounded-r-2xl rounded-tl-2xl p-3">
+          <div className="flex items-center gap-2">
+            <Avatar className="h-6 w-6">
+              <AvatarFallback className="bg-gradient-to-br from-orange-500 to-red-500 text-white text-xs">
+                AI
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex space-x-1">
+              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
+              <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+  </CardContent>
+
+  {/* Input */}
+  <CardFooter className="p-3 border-t">
+    <div className="flex items-center w-full border rounded-lg overflow-hidden">
+      <Input
+        value={message}
+        onChange={(e) => setMessage(e.target.value)}
+        placeholder="Ask about symptoms, treatments, or doshas..."
+        onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+        className="flex-1 border-0 focus:ring-0 focus:outline-none"
+      />
+      <Button
+        onClick={handleSendMessage}
+        disabled={!message.trim() || isTyping}
+        className="rounded-none"
+      >
+        <Send className="w-4 h-4" />
+      </Button>
+    </div>
+  </CardFooter>
+</Card>
+
         </motion.div>
 
         {/* Condition Database */}

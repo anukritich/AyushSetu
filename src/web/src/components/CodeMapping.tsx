@@ -115,7 +115,7 @@ export default function CodeMapping() {
       <div className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="sourceCode">NAMASTE Code</Label>
+            <Label htmlFor="sourceCode">NAMASTE Code( नमस्ते कोड )</Label>
             <Input
               id="sourceCode"
               value={sourceCode}
@@ -124,12 +124,12 @@ export default function CodeMapping() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="sourceDisplay">Display Name (optional)</Label>
+            <Label htmlFor="sourceDisplay">Display Name ( नाम )(optional)</Label>
             <Input
               id="sourceDisplay"
               value={sourceDisplay}
               onChange={(e) => setSourceDisplay(e.target.value)}
-              placeholder="e.g., Fever"
+              placeholder="e.g., Fever( बुखार )"
             />
           </div>
           <div className="space-y-2">
