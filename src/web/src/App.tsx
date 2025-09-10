@@ -45,8 +45,12 @@ export default function App() {
                   >
                     <Flower2 className="w-12 h-12 text-orange-500" />
                   </motion.div>
-                  <h1 className="text-5xl font-bold bg-gradient-to-r from-orange-500 via-green-600 to-orange-500 bg-clip-text text-transparent">
-                    आयुष FHIR Platform
+                  <h1 className="text-5xl font-bold  relative bg-gradient-to-r from-orange-500 via-green-600 to-orange-500 bg-clip-text text-transparent">
+                    <span className="bg-gradient-to-r from-orange-500 via-green-600 to-orange-500 bg-clip-text text-transparent">
+                    AyushSetu | आयुष-सेतु 
+                    </span> 
+                    {/* FHIR Platform */}
+                    {/*Fast Healthcare Interoperability Resources*/}
                   </h1>
                   <motion.div
                     animate={{ rotate: -360 }}
@@ -95,11 +99,11 @@ export default function App() {
         </div>
 
         <div className="max-w-7xl mx-auto p-6">
-          <Tabs defaultValue="dashboard" className="space-y-6">
-            <TabsList className="grid w-full grid-cols-7 h-14 bg-white/80 backdrop-blur-sm border-2 border-orange-200">
-              <TabsTrigger value="dashboard" className="text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white">
+          <Tabs defaultValue="search" className="space-y-6 ">
+            <TabsList className="grid flex justify-center w-full grid-cols-7 h-14 bg-white/80 backdrop-blur-sm border-2 border-orange-200">
+              {/* <TabsTrigger value="dashboard" className="text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-orange-500 data-[state=active]:to-orange-600 data-[state=active]:text-white">
                 🏠 Dashboard
-              </TabsTrigger>
+              </TabsTrigger> */}
               <TabsTrigger value="auth" className="text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-green-500 data-[state=active]:to-green-600 data-[state=active]:text-white">
                 🔐 Auth
               </TabsTrigger>
@@ -109,12 +113,12 @@ export default function App() {
               <TabsTrigger value="mapping" className="text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-500 data-[state=active]:to-purple-600 data-[state=active]:text-white">
                 🗺️ Mapping
               </TabsTrigger>
-              <TabsTrigger value="problems" className="text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-red-600 data-[state=active]:text-white">
+              {/* <TabsTrigger value="problems" className="text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-red-500 data-[state=active]:to-red-600 data-[state=active]:text-white">
                 📋 Problems
-              </TabsTrigger>
-              <TabsTrigger value="insights" className="text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-yellow-600 data-[state=active]:text-white">
+              </TabsTrigger> */}
+              {/* <TabsTrigger value="insights" className="text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-yellow-600 data-[state=active]:text-white">
                 📊 Insights
-              </TabsTrigger>
+              </TabsTrigger> */}
               <TabsTrigger value="assistant" className="text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
                 🕉️ Ayurvedic AI
               </TabsTrigger>
@@ -237,7 +241,8 @@ export default function App() {
               <Flower2 className="w-6 h-6 text-green-500" />
             </div>
             <p className="text-sm text-gray-600">
-              Built with ❤️ for the future of integrated traditional and modern healthcare in India
+              {/* Built with ❤️ for the future of integrated traditional and modern healthcare in India */}
+              Bridging Tradition with Global Health Standards.
             </p>
           </div>
         </footer>
