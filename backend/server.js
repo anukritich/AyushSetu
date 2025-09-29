@@ -2,21 +2,25 @@ const express = require("express");
 const cors = require("cors");
 const { spawn } = require("child_process");
 const searchRouter = require("./routes/search");
+const codeMappingRouter = require("./routes/codeMapping");
 
 const app = express();
 const port = 5000;
 
-// Middleware
-app.use(cors());            // allow frontend requests
-app.use(express.json());    // parse JSON request bodies
 
-// Existing search route (from routes/search.js)
+app.use(cors());          
+app.use(express.json());  
+
+
 app.use("/api/search", searchRouter);
+app.use("/api/code-mapping", codeMappingRouter);
 
 // Test route
 app.get("/api/search/test", (req, res) => {
   res.json({ message: "Search route working!" });
 });
+
+
 
 // 🚀 New POST route
 app.post("/api/map-to-icd", (req, res) => {
