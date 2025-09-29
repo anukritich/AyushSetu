@@ -119,9 +119,9 @@ export default function App() {
               {/* <TabsTrigger value="insights" className="text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-yellow-500 data-[state=active]:to-yellow-600 data-[state=active]:text-white">
                 📊 Insights
               </TabsTrigger> */}
-              <TabsTrigger value="assistant" className="text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
+              {/* <TabsTrigger value="assistant" className="text-sm font-medium data-[state=active]:bg-gradient-to-r data-[state=active]:from-indigo-500 data-[state=active]:to-indigo-600 data-[state=active]:text-white">
                 🕉️ Ayurvedic AI
-              </TabsTrigger>
+              </TabsTrigger> */}
             </TabsList>
 
             <TabsContent value="dashboard" className="space-y-6">

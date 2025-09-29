@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
@@ -10,11 +10,20 @@ import { Search, Loader2, Copy, Eye, Sparkles, TrendingUp, Filter, BookOpen } fr
 import { motion } from 'motion/react';
 import { useAuth } from './AuthContext';
 
-interface CodeConcept {
-  system: string;
+  interface CodeConcept {
+    system: string;
+    code: string;
+    display: string;
+    english:string;
+    designation?: Array<{ language: string; value: string }>;
+  }
+interface NamasteTerm {
+  NAMC_ID: number;
+  NAMC_term: string;
+  English_term: string;
+  Short_definition: string;
+  Long_definition?: string;
   code: string;
-  display: string;
-  designation?: Array<{ language: string; value: string }>;
 }
 
 export default function TerminologySearch() {
@@ -26,46 +35,123 @@ export default function TerminologySearch() {
   const [rawResponse, setRawResponse] = useState<any>(null);
   const [showRaw, setShowRaw] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [mappedICD, setMappedICD] = useState<any>(null);
 
-  const handleSearch = async () => {
-    if (!config.isConfigured) {
-      setError('Please configure authentication first');
-      return;
-    }
+  // const handleSearch = async () => {
+  //   if (!config.isConfigured) {
+  //     setError('Please configure authentication first');
+  //     return;
+  //   }
 
-    if (!searchTerm.trim()) {
-      setError('Please enter a search term');
-      return;
-    }
+  //   if (!searchTerm.trim()) {
+  //     setError('Please enter a search term');
+  //     return;
+  //   }
 
-    setLoading(true);
-    setError(null);
-    setResults([]);
-    setRawResponse(null);
+  //   setLoading(true);
+  //   setError(null);
+  //   setResults([]);
+  //   setRawResponse(null);
+
+  //   try {
+  //     // Search across multiple ValueSets
+  //     const endpoint = `/ValueSet/$expand?url=http://namaste.gov.in/fhir/terminology&filter=${encodeURIComponent(searchTerm)}`;
+  //     const response = await makeRequest(endpoint);
+      
+  //     if (!response.ok) {
+  //       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+  //     }
+
+  //     const data = await response.json();
+  //     setRawResponse(data);
+
+  //     if (data.expansion && data.expansion.contains) {
+  //       setResults(data.expansion.contains);
+  //     } else {
+  //       setResults([]);
+  //     }
+  //   } catch (err) {
+  //     setError(err instanceof Error ? err.message : 'Search failed');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  useEffect(() => {
+  const fetchICD = async () => {
+    if (!selectedConcept) return;
 
     try {
-      // Search across multiple ValueSets
-      const endpoint = `/ValueSet/$expand?url=http://namaste.gov.in/fhir/terminology&filter=${encodeURIComponent(searchTerm)}`;
-      const response = await makeRequest(endpoint);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
+      const response = await fetch("http://localhost:5000/api/map-to-icd", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          namaste_code: selectedConcept.code,
+          description: selectedConcept.designation?.[0]?.value || ""
+        })
+      });
 
       const data = await response.json();
-      setRawResponse(data);
 
-      if (data.expansion && data.expansion.contains) {
-        setResults(data.expansion.contains);
+      if (data.success && data.data) {
+        // ✅ Parse the stringified array
+        const icdArray = JSON.parse(data.data);
+        setMappedICD(icdArray);
       } else {
-        setResults([]);
+        setMappedICD([]);
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Search failed');
-    } finally {
-      setLoading(false);
+      console.error("Error fetching ICD mapping:", err);
+      setMappedICD([]);
     }
   };
+
+  fetchICD();
+}, [selectedConcept]);
+
+
+const handleSearch = async () => {
+  if (!searchTerm.trim()) {
+    setError('Please enter a search term');
+    return;
+  }
+
+  setLoading(true);
+  setError(null);
+  setResults([]);
+  setRawResponse(null);
+
+  try {
+    // Call your Node.js API
+    const res = await fetch(`http://localhost:5000/api/search?q=${encodeURIComponent(searchTerm)}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+
+    const data = await res.json();
+    setRawResponse(data);
+
+    // Map API response to CodeConcept structure for your UI
+    const mappedResults = data.map((item: any) => ({
+      system: 'namaste', // for badge styling
+      code: item.NAMC_CODE,           // NAMASTE code
+      display: item.NAMC_term,        // NAMASTE term
+      english:item.English_term,
+      
+      designation: [
+        { 
+          language: 'en', 
+          value: `${item.Description||item.Short_definition || item.Long_definition || ''}` 
+        },
+      ],
+    }));
+
+    setResults(mappedResults);
+  } catch (err) {
+    setError(err instanceof Error ? err.message : 'Search failed');
+  } finally {
+    setLoading(false);
+  }
+};
+
+
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -126,7 +212,7 @@ export default function TerminologySearch() {
             </div>
             <Button 
               onClick={handleSearch} 
-              disabled={loading || !config.isConfigured}
+              //disabled={loading || !config.isConfigured}
               className="px-8 h-12 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
             >
               {loading ? (
@@ -257,7 +343,7 @@ export default function TerminologySearch() {
         >
           <Card className="border-2 border-orange-200 shadow-xl">
             <CardHeader className="bg-gradient-to-r from-orange-50 to-yellow-50">
-              <CardTitle className="text-xl text-orange-800">🎯 Selected Concept Details</CardTitle>
+              <CardTitle className="text-xl text-orange-800">🎯 Search Results</CardTitle>
             </CardHeader>
           <CardContent>
             <div className="space-y-3">
@@ -275,10 +361,37 @@ export default function TerminologySearch() {
                 <Label className="text-sm font-medium">System</Label>
                 <div className="text-sm text-gray-900">{selectedConcept.system}</div>
               </div>
+              {selectedConcept.english && (
+                <div>
+                  <Label className="text-sm font-medium">English Term</Label>
+                  <div className="text-sm text-gray-900">{selectedConcept.english}</div>
+                </div>
+              )}
               {selectedConcept.designation && selectedConcept.designation.length > 0 && (
                 <div>
                   <Label className="text-sm font-medium">Description</Label>
-                  <div className="text-sm text-gray-900">{selectedConcept.designation[0].value}</div>
+                  <div className="text-sm text-gray-900" style={{ whiteSpace: 'pre-line' }}>
+                    {selectedConcept.designation[0].value}
+                    </div>
+                </div>
+              )}
+              {mappedICD && mappedICD.length > 0 && (
+                <div className="mt-4">
+                  <Label className="text-sm font-medium">Mapped ICD Codes</Label>
+                  <div className="space-y-2">
+                    {mappedICD.map((item: any, index: number) => (
+                      <Card key={index} className="p-3 border rounded shadow-sm">
+                        <div className="flex justify-between">
+                          <div>
+                            <strong>Rank {index + 1}:</strong> {item.icd_code} - <span dangerouslySetInnerHTML={{__html: item.title}} />
+                          </div>
+                          <a href={item.uri} target="_blank" rel="noopener noreferrer" className="text-blue-600 underline">
+                            View
+                          </a>
+                        </div>
+                      </Card>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
