@@ -22,6 +22,7 @@ interface MappingMatch {
     system: string;
     code: string;
     display: string;
+    score:number;
   };
   source: string;
   confidence: number;
@@ -79,6 +80,7 @@ export default function CodeMapping() {
             system: m.system || "Unknown System",
             code: m.code || "",
             display: m.display || "",
+            score: m.score || "",
           },
           source: m.source || "",
           confidence: m.confidence != null ? m.confidence : 1,
@@ -201,57 +203,62 @@ export default function CodeMapping() {
               ) : (
                 <div className="space-y-3">
                   {mappingResult.matches.map((match, index) => (
-                    <Card key={index} className="border-l-4 border-l-blue-500">
-                      <CardContent className="p-4">
-                        <div className="flex justify-between items-start mb-3">
-                          <div className="flex-1">
-                            {/* Applied cleanDisplay function here to remove <em> tags */}
-                            <div className="font-medium text-gray-900">
-                              {cleanDisplay(match.concept.display) || "Unknown"}
-                            </div>
-                            <div className="text-sm text-gray-600 mt-1">
-                              Code: {match.concept.code || "N/A"}
-                            </div>
-                          </div>
-                          <div className="flex gap-2 items-center">
-                            <Badge className={getEquivalenceBadgeColor(match.equivalence)}>
-                              {match.equivalence}
-                            </Badge>
-                            <Badge variant="outline">
-                              {getTargetSystemLabel(match.concept.system)}
-                            </Badge>
-                          </div>
-                        </div>
+  <Card key={index} className="border-l-4 border-l-blue-500">
+    <CardContent className="p-4">
+      <div className="flex justify-between items-start mb-3">
+        <div className="flex-1">
+          {/* Applied cleanDisplay function here to remove <em> tags */}
+          <div className="font-medium text-gray-900">
+            {cleanDisplay(match.concept.display) || "Unknown"}
+          </div>
+          <div className="text-sm text-gray-600 mt-1">
+            Code: {match.concept.code || "N/A"}
+          </div>
 
-                        <div className="space-y-2">
-                          {/*<div>
-                            <Label className="text-xs font-medium text-gray-500">
-                              Confidence Score
-                            </Label>
-                            <div className="flex items-center gap-2 mt-1">
-                              <Progress
-                                value={(match.confidence || 1) * 100}
-                                className="flex-1 h-2"
-                              />
-                              <span className="text-sm font-medium">
-                                {Math.round((match.confidence || 1) * 100)}%
-                              </span>
-                            </div>
-                          </div>*/}
+          {/* 🔹 Fuzzy Match Score with Progress Bar */}
+          {/* <div className="mt-2">
+            <Label className="text-xs font-medium text-gray-500">
+              Match Score
+            </Label>
+            <div className="flex items-center gap-2 mt-1">
+              <Progress
+                value={match.concept.score || 0}
+                className="flex-1 h-2"
+              />
+              <span className="text-sm font-medium">
+                {match.concept.score
+                  ? `${match.concept.score.toFixed(1)}%`
+                  : "N/A"}
+              </span>
+            </div>
+          </div> */}
+        </div>
 
-                          <div className="text-xs text-gray-500">
-                            <strong>System:</strong> {match.concept.system || "Unknown"}
-                          </div>
+        <div className="flex gap-2 items-center">
+          <Badge className={getEquivalenceBadgeColor(match.equivalence)}>
+            {match.equivalence}
+          </Badge>
+          <Badge variant="outline">
+            {getTargetSystemLabel(match.concept.system)}
+          </Badge>
+        </div>
+      </div>
 
-                          {match.source && (
-                            <div className="text-xs text-gray-500">
-                              <strong>Mapping Source:</strong> {match.source}
-                            </div>
-                          )}
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
+      <div className="space-y-2">
+        <div className="text-xs text-gray-500">
+          <strong>System:</strong> {match.concept.system || "Unknown"}
+        </div>
+
+        {match.source && (
+          <div className="text-xs text-gray-500">
+            <strong>Mapping Source:</strong> {match.source}
+          </div>
+        )}
+      </div>
+    </CardContent>
+  </Card>
+))}
+
                 </div>
               )}
             </div>

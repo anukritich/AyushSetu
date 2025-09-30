@@ -96,16 +96,28 @@ def main():
     results = search_icd(token, query)
     entities = results.get("destinationEntities", [])
 
+    # Sort by score (descending), fallback to rank if score missing
+    entities_sorted = sorted(
+        entities,
+        key=lambda e: e.get("score", e.get("rank", 0)),
+        reverse=True
+    )
+
+    # Take top 5
+    top_entities = entities_sorted[:5]
+
     output = []
-    for ent in entities:
+    for ent in top_entities:
         output.append({
             "icd_code": ent.get("code") or ent.get("theCode"),
             "title": ent.get("title") or ent.get("label"),
             "uri": ent.get("id") or ent.get("uri"),
+            "score": ent.get("score", ent.get("rank", None))  # fuzzy score exposed
         })
     
-    # Print JSON so Node.js can parse it
-    print(json.dumps(output))
+    # Print JSON so Node.js can parse and send to frontend
+    print(json.dumps(output, indent=2))
+
 
 if __name__ == "__main__":
     main()
