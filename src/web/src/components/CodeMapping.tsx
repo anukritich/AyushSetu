@@ -9,6 +9,13 @@ import { Progress } from './ui/progress';
 import { ArrowRight, Loader2, MapPin, Eye } from 'lucide-react';
 import { useAuth } from './AuthContext';
 
+// Utility function to strip HTML tags (like <em>) from a string
+const cleanDisplay = (text) => {
+  if (!text) return "";
+  // Regex to match and remove any HTML tag (e.g., <em> or <em class='found'>)
+  return text.replace(/<[^>]*>?/gm, '');
+};
+
 interface MappingMatch {
   equivalence: string;
   concept: {
@@ -48,6 +55,8 @@ export default function CodeMapping() {
     setRawResponse(null);
 
     try {
+      // Simulate API call to fetch code mapping
+      // In a real application, replace this with your actual fetch logic
       const response = await fetch("/api/code-mapping", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -196,8 +205,9 @@ export default function CodeMapping() {
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start mb-3">
                           <div className="flex-1">
+                            {/* Applied cleanDisplay function here to remove <em> tags */}
                             <div className="font-medium text-gray-900">
-                              {match.concept.display || "Unknown"}
+                              {cleanDisplay(match.concept.display) || "Unknown"}
                             </div>
                             <div className="text-sm text-gray-600 mt-1">
                               Code: {match.concept.code || "N/A"}
@@ -214,7 +224,7 @@ export default function CodeMapping() {
                         </div>
 
                         <div className="space-y-2">
-                          <div>
+                          {/*<div>
                             <Label className="text-xs font-medium text-gray-500">
                               Confidence Score
                             </Label>
@@ -227,7 +237,7 @@ export default function CodeMapping() {
                                 {Math.round((match.confidence || 1) * 100)}%
                               </span>
                             </div>
-                          </div>
+                          </div>*/}
 
                           <div className="text-xs text-gray-500">
                             <strong>System:</strong> {match.concept.system || "Unknown"}
@@ -276,9 +286,9 @@ export default function CodeMapping() {
               <li><Badge className="bg-orange-100 text-orange-800 mr-2">inexact</Badge>Approximate match</li>
             </ul>
           </div>
-          <div>
+          {/*<div>
             <strong>Confidence Score:</strong> Indicates the reliability of the mapping (0-100%).
-          </div>
+          </div>*/}
         </CardContent>
       </Card>
     </div>
