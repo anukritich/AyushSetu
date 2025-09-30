@@ -26,13 +26,13 @@ router.post("/", (req, res) => {
     }
 
     // Check if row exists and description is available
-    if (!row || !row.DESCRIPTION) {
+    if (!row || !row.Description) {
       return res
         .status(404)
         .json({ success: false, message: `NAMASTE code ${namaste_code} found, but description is missing.` });
     }
 
-    const description = row.DESCRIPTION;
+    const description = row.Description;
 
     // Call Python ICD script
     // Note: Assuming '../src/api/icd_search.py' is the correct path relative to where this Node process runs.
