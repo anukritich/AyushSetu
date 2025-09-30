@@ -9,6 +9,13 @@ import { Progress } from './ui/progress';
 import { ArrowRight, Loader2, MapPin, Eye } from 'lucide-react';
 import { useAuth } from './AuthContext';
 
+// Utility function to strip HTML tags (like <em>) from a string
+const cleanDisplay = (text) => {
+  if (!text) return "";
+  // Regex to match and remove any HTML tag (e.g., <em> or <em class='found'>)
+  return text.replace(/<[^>]*>?/gm, '');
+};
+
 interface MappingMatch {
   equivalence: string;
   concept: {
@@ -26,7 +33,7 @@ interface MappingResult {
 }
 
 export default function CodeMapping() {
-  const { config, makeRequest } = useAuth();
+  const { config } = useAuth();
   const [sourceSystem, setSourceSystem] = useState('http://namaste.gov.in/fhir/terminology');
   const [sourceCode, setSourceCode] = useState('');
   const [sourceDisplay, setSourceDisplay] = useState('');
@@ -37,13 +44,8 @@ export default function CodeMapping() {
   const [error, setError] = useState<string | null>(null);
 
   const handleMapping = async () => {
-    if (!config.isConfigured) {
-      setError('Please configure authentication first');
-      return;
-    }
-
     if (!sourceCode.trim()) {
-      setError('Please enter a source code');
+      setError("Please enter a NAMASTE code");
       return;
     }
 
@@ -53,40 +55,39 @@ export default function CodeMapping() {
     setRawResponse(null);
 
     try {
-      // Call ConceptMap/$translate
-      const endpoint = `/ConceptMap/$translate?system=${encodeURIComponent(sourceSystem)}&code=${encodeURIComponent(sourceCode)}&target=http://id.who.int/icd11/mms`;
-      const response = await makeRequest(endpoint);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
+      // Simulate API call to fetch code mapping
+      // In a real application, replace this with your actual fetch logic
+      const response = await fetch("/api/code-mapping", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ namaste_code: sourceCode }),
+      });
 
       const data = await response.json();
-      setRawResponse(data);
 
-      // Parse FHIR Parameters response
-      if (data.resourceType === 'Parameters' && data.parameter) {
-        const resultParam = data.parameter.find((p: any) => p.name === 'result');
-        const matchParams = data.parameter.filter((p: any) => p.name === 'match');
-        
-        const matches: MappingMatch[] = matchParams.map((match: any) => {
-          const equivalence = match.part?.find((p: any) => p.name === 'equivalence')?.valueCode || '';
-          const concept = match.part?.find((p: any) => p.name === 'concept')?.valueCoding || {};
-          const source = match.part?.find((p: any) => p.name === 'source')?.valueUri || '';
-          const confidence = match.part?.find((p: any) => p.name === 'confidence')?.valueDecimal || 0;
-          
-          return { equivalence, concept, source, confidence };
-        });
-
-        setMappingResult({
-          result: resultParam?.valueBoolean || false,
-          matches
-        });
-      } else {
-        setError('Invalid response format from ConceptMap/$translate');
+      if (!data.success) {
+        throw new Error(data.message || "Mapping failed");
       }
+
+      setSourceDisplay(data.description || sourceCode); // fallback to code if description missing
+
+      setMappingResult({
+        result: data.icd_mappings && data.icd_mappings.length > 0,
+        matches: (data.icd_mappings || []).map((m: any) => ({
+          equivalence: m.equivalence || "equivalent",
+          concept: m.concept || {
+            system: m.system || "Unknown System",
+            code: m.code || "",
+            display: m.display || "",
+          },
+          source: m.source || "",
+          confidence: m.confidence != null ? m.confidence : 1,
+        })),
+      });
+
+      setRawResponse(data); // optional: show raw JSON
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Mapping failed');
+      setError(err instanceof Error ? err.message : "Mapping failed");
     } finally {
       setLoading(false);
     }
@@ -102,7 +103,8 @@ export default function CodeMapping() {
     }
   };
 
-  const getTargetSystemLabel = (system: string) => {
+  const getTargetSystemLabel = (system?: string) => {
+    if (!system) return "Unknown System";
     if (system.includes('icd11')) {
       if (system.includes('biomed')) return 'ICD-11 Biomedicine';
       return 'ICD-11 TM2';
@@ -134,9 +136,9 @@ export default function CodeMapping() {
           </div>
           <div className="space-y-2">
             <Label>&nbsp;</Label>
-            <Button 
-              onClick={handleMapping} 
-              disabled={loading || !config.isConfigured}
+            <Button
+              onClick={handleMapping}
+              //disabled={loading || !config.isConfigured}
               className="w-full"
             >
               {loading ? (
@@ -203,11 +205,12 @@ export default function CodeMapping() {
                       <CardContent className="p-4">
                         <div className="flex justify-between items-start mb-3">
                           <div className="flex-1">
+                            {/* Applied cleanDisplay function here to remove <em> tags */}
                             <div className="font-medium text-gray-900">
-                              {match.concept.display}
+                              {cleanDisplay(match.concept.display) || "Unknown"}
                             </div>
                             <div className="text-sm text-gray-600 mt-1">
-                              Code: {match.concept.code}
+                              Code: {match.concept.code || "N/A"}
                             </div>
                           </div>
                           <div className="flex gap-2 items-center">
@@ -219,27 +222,27 @@ export default function CodeMapping() {
                             </Badge>
                           </div>
                         </div>
-                        
+
                         <div className="space-y-2">
-                          <div>
+                          {/*<div>
                             <Label className="text-xs font-medium text-gray-500">
                               Confidence Score
                             </Label>
                             <div className="flex items-center gap-2 mt-1">
-                              <Progress 
-                                value={match.confidence * 100} 
+                              <Progress
+                                value={(match.confidence || 1) * 100}
                                 className="flex-1 h-2"
                               />
                               <span className="text-sm font-medium">
-                                {Math.round(match.confidence * 100)}%
+                                {Math.round((match.confidence || 1) * 100)}%
                               </span>
                             </div>
-                          </div>
-                          
+                          </div>*/}
+
                           <div className="text-xs text-gray-500">
-                            <strong>System:</strong> {match.concept.system}
+                            <strong>System:</strong> {match.concept.system || "Unknown"}
                           </div>
-                          
+
                           {match.source && (
                             <div className="text-xs text-gray-500">
                               <strong>Mapping Source:</strong> {match.source}
@@ -283,9 +286,9 @@ export default function CodeMapping() {
               <li><Badge className="bg-orange-100 text-orange-800 mr-2">inexact</Badge>Approximate match</li>
             </ul>
           </div>
-          <div>
+          {/*<div>
             <strong>Confidence Score:</strong> Indicates the reliability of the mapping (0-100%).
-          </div>
+          </div>*/}
         </CardContent>
       </Card>
     </div>
